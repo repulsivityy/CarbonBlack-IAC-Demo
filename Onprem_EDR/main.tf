@@ -103,14 +103,14 @@ resource "aws_security_group" "edr_sg" {
   #allow ingress
   ingress {
     description = "SSH Access"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["207.66.113.69/32"]
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
   }
   ingress {
     description = "HTTPS access"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["207.66.113.69/32"]
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -148,7 +148,7 @@ resource "aws_key_pair" "public_key" {
   public_key = var.public_key
 }
 
-# Creates Win Server EC2 instance
+# Creates CentOS Server EC2 instance
 resource "aws_instance" "edr_server" {
   ami             = var.edr_ami
   instance_type   = var.edr_instance
@@ -156,26 +156,37 @@ resource "aws_instance" "edr_server" {
   security_groups = [aws_security_group.edr_sg.id]
   key_name        = aws_key_pair.public_key.id
 
+  user_data = <<EOF
+  #!/bin/bash
+  echo "Changing Hostname" 
+  sudo hostnamectl set-hostname cb-edrserver
+  
+  echo "updating cent os"
+  sudo yum update
+  
+  EOF
+
   root_block_device {
     volume_size = var.root_volume_size
   }
 
   tags = {
-    Name        = "EDR"
+    Name        = "EDR-Server"
     Environment = "CB-Demo"
   }
 
+/*
 # provisioner
-#provisioner "file" {
-#    #source = <file path>
-#    #destination = <home path>
+provisioner "file" {
+    source = "/Users/dominicc1/Desktop/edr-license.zip"
+    destination = "/home/centos/edr-license.zip"
 
-#        connection {
-#            type = "ssh"
-#            user = "centos"
-#            private_key = file("/Users/dominicc1/Desktop/Dominic/Dom_AWS_Keypair.pem") 
-#            host = aws_instance.edr_server.public_ip
-#        }
-#}
-
+        connection {
+            type = "ssh"
+            user = "centos"
+            private_key = file("/Users/dominicc1/Desktop/Dominic/Dom_AWS_Keypair.pem") 
+            host = self.associate_public_ip_address
+        }
+  }
+*/
 }

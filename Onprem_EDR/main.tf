@@ -103,14 +103,14 @@ resource "aws_security_group" "edr_sg" {
   #allow ingress
   ingress {
     description = "SSH Access"
-    cidr_blocks = ["207.66.113.69/32"]
+    cidr_blocks = ["0.0.0.0/0"]
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
   }
   ingress {
     description = "HTTPS access"
-    cidr_blocks = ["207.66.113.69/32"]
+    cidr_blocks = ["0.0.0.0/0"]
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
